@@ -7,3 +7,8 @@ license = "MIT"
 langversion >= 0.5.1
 
 depends = numidr >= 0.2.1
+
+modules = Kinematics.Joint,
+          Kinematics.Arm,
+          Kinematics.Forward,
+          Kinematics.Inverse
