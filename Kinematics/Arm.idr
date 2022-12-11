@@ -27,8 +27,7 @@ export
 getLimits : (arm : ArmElement n) -> Vect (countJoints arm) (Double, Double)
 getLimits [] = []
 getLimits (Left _ :: xs) = getLimits xs
-getLimits (Right (Revolute a b) :: xs) = (a,b) :: getLimits xs
-getLimits (Right (Prismatic a b) :: xs) = (a,b) :: getLimits xs
+getLimits (Right (MkJoint _ l u) :: xs) = (l,u) :: getLimits xs
 
 export
 link : Vector n Double -> ArmElement n
@@ -38,24 +37,23 @@ export
 linkX : {n : _} -> Double -> ArmElement (1 + n)
 linkX x = link $ vector (x :: replicate n 0)
 
-export
-revolute2D : (a, b : Double) -> ArmElement 2
-revolute2D a b = [Right $ Revolute a b]
 
 export
-revoluteX : (a, b : Double) -> ArmElement 3
-revoluteX a b = [Left $ cast (Rotation.rotate3DY (pi/2)),
-                 Right $ Revolute a b,
+revolute2D : (l, u : Double) -> ArmElement 2
+revolute2D l u = [Right $ MkJoint Revolute l u]
+
+export
+revoluteX : (l, u : Double) -> ArmElement 3
+revoluteX l u = [Left $ cast (Rotation.rotate3DY (pi/2)),
+                 Right $ MkJoint Revolute l u,
                  Left $ cast (Rotation.rotate3DY (-pi/2))]
 
 export
-revoluteY : (a, b : Double) -> ArmElement 3
-revoluteY a b = [Left $ cast (Rotation.rotate3DX (-pi/2)),
-                 Right $ Revolute a b,
+revoluteY : (l, u : Double) -> ArmElement 3
+revoluteY l u = [Left $ cast (Rotation.rotate3DX (-pi/2)),
+                 Right $ MkJoint Revolute l u,
                  Left $ cast (Rotation.rotate3DX (pi/2))]
 
 export
-revoluteZ : (a, b : Double) -> ArmElement 3
-revoluteZ a b = [Right $ Revolute a b]
-
-
+revoluteZ : (l, u : Double) -> ArmElement 3
+revoluteZ l u = [Right $ MkJoint Revolute l u]
