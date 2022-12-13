@@ -25,10 +25,19 @@ initialSimplex arm =
           Fin.range
 
 
+||| Given an arm and an end affector position, try to find a joint configuration
+||| that approximates the given position. If no such configuration is found
+||| within the arm's joint limits, `Nothing` is returned.
+|||
+||| @ fuel A value limiting the number of iterations the optimization algorithm
+||| performs
 export
 inverse : {n : _} -> (fuel : Fuel) -> (arm : ArmElement n) -> Point n Double
-            -> {auto 0 ok : IsSucc (countJoints arm)} -> Maybe (ArmConfig arm)
-inverse fuel arm p = go fuel !(initialSimplex arm)
+            -> Maybe (ArmConfig arm)
+inverse fuel arm p =
+  case isItSucc (countJoints arm) of
+    No _ => Nothing
+    Yes ok => go fuel !(initialSimplex arm) {ok}
   where
     sndLast : forall n. {auto 0 ok : IsSucc n} -> Vect (S n) a -> a
     sndLast {n=S n,ok=ItIsSucc} v = last $ init v
@@ -41,7 +50,8 @@ inverse fuel arm p = go fuel !(initialSimplex arm)
     sort : Simplex arm -> Simplex arm
     sort s = believe_me $ Vect.fromList $ sortBy (compare `on` cost) $ toList s
 
-    go : Fuel -> Simplex arm -> Maybe (ArmConfig arm)
+    go : Fuel -> Simplex arm -> {auto 0 ok : IsSucc (countJoints arm)}
+            -> Maybe (ArmConfig arm)
     go Dry _ = Nothing
     go (More fuel) simplex = do
       guard (all (and . zipWith (\(a,b),x => a <= x && x <= b)
@@ -49,7 +59,7 @@ inverse fuel arm p = go fuel !(initialSimplex arm)
         let simplex = unsafePerformIO (let s = sort simplex in printLn s $> s)
             best = head simplex
             cbest = !(cost best)
-        in  if cbest < 0.00001 then Just best
+        in  if cbest < 0.0000001 then Just best
         else let
             worst = last simplex
             cworst = !(cost worst)

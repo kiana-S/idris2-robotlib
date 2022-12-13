@@ -7,6 +7,8 @@ import public Kinematics.Arm
 %default total
 
 
+||| Calculate the homogeneous matrix representing the end affector's position,
+||| given an arm and a vector of input joint values.
 export
 forwardTransform : {n : _} -> (arm : ArmElement n) -> ArmConfig arm
                     -> Maybe (Rigid n Double)
@@ -19,6 +21,8 @@ forwardTransform arm = go arm . toVect
     go (Right j :: xs) (c :: cs) = [| jointAction j c *. go xs cs |]
 
 
+||| Calculate the position of the end affector, given an arm and a vetor of
+||| input joint values.
 export
 forward : {n : _} -> (arm : ArmElement n) -> ArmConfig arm ->
             Maybe (Point n Double)
