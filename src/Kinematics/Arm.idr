@@ -62,6 +62,12 @@ linkX : {n : _} -> Double -> ArmElement (1 + n)
 linkX x = link $ vector (x :: replicate n 0)
 
 
+||| A two-dimensional link that rotates the next element by the given angle.
+export
+linkRotate2D : Double -> ArmElement 2
+linkRotate2D a = [Left $ cast (Rotation.rotate2D a)]
+
+
 ||| A two-dimensional revolute joint with the given limits.
 |||
 ||| @ l The lower limit angle of the joint
@@ -97,3 +103,36 @@ revoluteY l u = [Left $ cast (Rotation.rotate3DX (-pi/2)),
 export
 revoluteZ : (l, u : Double) -> ArmElement 3
 revoluteZ l u = [Right $ MkJoint Revolute l u]
+
+
+||| A prismatic joint that moves along the X axis.
+|||
+||| @ l The lower limit of the joint
+||| @ u The upper limit of the joint
+export
+prismaticX : (l, u : Double) -> ArmElement (1 + n)
+prismaticX l u = [Right $ MkJoint Prismatic l u]
+
+||| A prismatic joint that moves along the Y axis.
+|||
+||| @ l The lower limit of the joint
+||| @ u The upper limit of the joint
+export
+prismaticY : {n : _} -> (l, u : Double) -> ArmElement (2 + n)
+prismaticY l u = [Left $ unsafeMkTrans (indexSetRange [EndBound 2,EndBound 2]
+                        (rewrite rangeLenZ 2 in rotate2D (pi/2)) identity),
+                  Right $ MkJoint Prismatic l u,
+                  Left $ unsafeMkTrans (indexSetRange [EndBound 2,EndBound 2]
+                        (rewrite rangeLenZ 2 in rotate2D (-pi/2)) identity)]
+
+||| A prismatic joint that moves along the Z axis.
+|||
+||| @ l The lower limit of the joint
+||| @ u The upper limit of the joint
+export
+prismaticZ : {n : _} -> (l, u : Double) -> ArmElement (3 + n)
+prismaticZ l u = [Left $ unsafeMkTrans (indexSetRange [EndBound 3,EndBound 3]
+                        (rewrite rangeLenZ 3 in rotate3DY (-pi/2)) identity),
+                  Right $ MkJoint Prismatic l u,
+                  Left $ unsafeMkTrans (indexSetRange [EndBound 3,EndBound 3]
+                        (rewrite rangeLenZ 3 in rotate3DY (pi/2)) identity)]
